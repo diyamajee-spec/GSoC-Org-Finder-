@@ -41,7 +41,7 @@ def get_llm_client():
         sys.exit(1)
     genai.configure(api_key=api_key)
     return genai.GenerativeModel(
-        model_name="gemini-2.5-flash",
+        model_name="gemini-1.5-flash",
         generation_config=genai.types.GenerationConfig(
             temperature=0.2,
             max_output_tokens=8192,  # raised from 4096 — issue solver writes multiple full files
