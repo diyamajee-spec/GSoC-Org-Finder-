@@ -7,7 +7,7 @@ import os
 import re
 import sys
 import requests
-import google.generativeai as genai
+from google import genai
 from github import Github, GithubException
 
 
@@ -34,36 +34,33 @@ def get_repo(g: Github):
 # ─── LLM client ───────────────────────────────────────────────────────────────
 
 def get_llm_client():
-    """Configure Gemini and return a GenerativeModel instance."""
+    """Create and return a google-genai Client instance."""
     api_key = os.environ.get("TENET_AI_KEY")
     if not api_key:
         print("❌ TENET_AI_KEY secret is not set. Please add it in repo Settings → Secrets → Actions.")
         sys.exit(1)
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.2,
-            max_output_tokens=8192,  # raised from 4096 — issue solver writes multiple full files
-        ),
-        safety_settings=[
-            {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-            },
-        ],
-    )
+    return genai.Client(api_key=api_key)
 
 
-def call_llm(model, prompt: str) -> str | None:
+def call_llm(client, prompt: str) -> str | None:
     """
-    Call Gemini and return the text response.
-
-    Returns None on failure so callers can distinguish an error
-    from a valid (but empty) model response.
+    Call Gemini using the new google-genai SDK and return the text response.
     """
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
+            config={
+                "temperature": 0.2,
+                "max_output_tokens": 8192,
+                "safety_settings": [
+                    {
+                        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                    },
+                ],
+            },
+        )
         return response.text.strip()
     except Exception as e:
         print(f"⚠️  LLM call failed: {e}")
