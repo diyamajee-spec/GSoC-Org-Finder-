@@ -101,22 +101,63 @@
     .hero-gradient{background:linear-gradient(135deg,#9d4300 0%,#f97316 50%,#f59e0b 100%)}
 
     /* Modal Styles */
-    .modal-bg {
+    .modal-bg, .compare-bg {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.4);
       backdrop-filter: blur(4px);
-      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 100;
       opacity: 0;
-      pointer-events: none;
+      visibility: hidden;
       transition: all 0.3s ease;
     }
-    .modal-bg.open {
+    .modal-bg.open, .compare-bg.open {
       opacity: 1;
-      pointer-events: auto;
+      visibility: visible;
+    }
+    .modal-bg.open .modal, .compare-bg.open .modal {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 1rem;
+    }
+    .compare-table th, .compare-table td {
+      padding: 1rem 0.75rem;
+      border-bottom: 1px solid #f3f3f3;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    .compare-table th {
+      font-weight: 800;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.7rem;
+      background: #fafafa;
+      position: sticky;
+      top: 0;
+    }
+    .compare-val {
+      font-weight: 600;
+      color: #18181b;
+    }
+    .compare-row-label {
+      background: #fafafa;
+      width: 120px;
+    }
+    .compare-best {
+      color: #059669;
+      font-weight: 700;
+    }
+    #compareBadge.show {
+      display: flex;
     }
     .modal {
       background: white;
@@ -129,9 +170,6 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       transform: scale(0.9);
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .modal-bg.open .modal {
-      transform: scale(1);
     }
     .close-btn {
       position: absolute;
@@ -338,12 +376,16 @@
     </div>
     
     <!-- Right side: Toggle visible on all screens, GitHub button hidden on mobile -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <button id="themeToggleBtn" onclick="toggleTheme()" class="inline-flex shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-full transition-colors" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme">
+    <div class="flex items-center gap-2">
+      <button onclick="openCompareModal()" class="relative p-2 hover:bg-zinc-100/50 rounded-lg transition-colors" title="Open Comparison Tool">
+        <span class="material-symbols-outlined text-zinc-600">compare</span>
+        <span id="compareBadge" class="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full hidden">0</span>
+      </button>
+      <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 hover:bg-zinc-100/50 rounded-lg transition-colors" aria-label="Toggle theme">
         <span class="material-symbols-outlined text-zinc-600">dark_mode</span>
       </button>
-      <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-" target="_blank" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
-        <span class="material-symbols-outlined text-sm">star</span> Star & Contribute
+      <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-" target="_blank" class="hidden sm:flex p-2 hover:bg-zinc-100/50 rounded-lg transition-colors" title="View Source on GitHub">
+        <svg class="w-5 h-5 text-zinc-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.031 1.531 1.031.892 1.529 2.341 1.087 2.912.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
       </a>
     </div>
   </div>
@@ -750,11 +792,11 @@
       <span class="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Decision Tool</span>
       <h2 class="text-4xl font-extrabold font-headline tracking-tighter mt-2 mb-6">Compare Organizations</h2>
       <p class="text-zinc-600 leading-relaxed mb-8">Select up to 3 orgs to compare side-by-side. See history, mentor count, tech stack, competition level, and active GFIs at a glance.</p>
-      <a href="https://findmygsoc.vercel.app" target="_blank" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl hover:scale-95 transition-all shadow-lg">
+      <button onclick="openCompareModal()" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl hover:scale-95 transition-all shadow-lg">
         <span class="material-symbols-outlined">compare</span> Open Comparison Tool
-      </a>
+      </button>
     </div>
-    <div class="bg-surface-container-low rounded-3xl p-8 border border-zinc-100">
+    <div id="compare" class="bg-surface-container-low rounded-3xl p-8 border border-zinc-100">
       <div class="grid grid-cols-3 gap-4 text-center">
         <div class="bg-white rounded-xl p-4 border border-zinc-100">
           <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center mx-auto mb-3"><span class="material-symbols-outlined text-orange-600">psychology</span></div>
@@ -836,6 +878,32 @@
       <a href="#" target="_blank" id="mRepoBtn" class="modal-cta modal-repo-link flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-lg">code</span> Repository
       </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ COMPARISON MODAL ═══════════════════ -->
+<div class="compare-bg" id="compareModal">
+  <div class="modal max-w-5xl w-[95%] max-h-[90vh] flex flex-col">
+    <div class="modal-header shrink-0">
+      <div class="flex items-center justify-between w-full">
+        <div>
+          <span class="category-tag">Decision Tool</span>
+          <h2 class="text-2xl font-bold">Organization Comparison</h2>
+          <p class="text-xs text-zinc-500 mt-1">Comparing selected organizations side-by-side</p>
+        </div>
+        <button onclick="closeCompareModal()" class="p-2 hover:bg-zinc-100 rounded-full transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body overflow-auto flex-1 p-0">
+      <div id="compareModalContent" class="p-6">
+        <!-- Table injected here -->
+      </div>
+    </div>
+    <div class="modal-footer shrink-0">
+      <p class="text-[10px] text-zinc-400">Values are based on GSoC 2026 data and historical participation.</p>
     </div>
   </div>
 </div>
@@ -1017,11 +1085,12 @@
       
       const githubOwner = org.github.split('/')[0];
       const logoUrl = `https://github.com/${githubOwner}.png?size=80`;
+      const escapedName = org.name.replace(/'/g, "\\'");
       
       card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
           <div class="w-14 h-14 rounded-xl bg-surface-container-low flex items-center justify-center p-2 overflow-hidden">
-            <img src="${logoUrl}" onerror="handleImgError(this, '${org.name}')" alt="${org.name} logo" class="w-full h-full object-contain rounded-lg" />
+            <img src="${logoUrl}" onerror="handleImgError(this, '${escapedName}')" alt="${org.name} logo" class="w-full h-full object-contain rounded-lg" />
             <div class="logo-placeholder hidden w-full h-full items-center justify-center text-primary font-bold text-xl bg-primary/5"></div>
           </div>
           <div class="flex items-center gap-2">
@@ -1041,11 +1110,11 @@
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-zinc-100">
           <div class="flex items-center gap-3">
-             <button onclick="toggleCompare(event, '${org.name}')" class="text-[10px] font-bold uppercase tracking-widest ${isComparing ? 'text-primary' : 'text-zinc-400'} hover:text-primary flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">${isComparing ? 'check_circle' : 'compare_arrows'}</span> ${isComparing ? 'Comparing' : 'Compare'}
+             <button onclick="toggleCompare(event, '${escapedName}')" class="text-[10px] font-bold uppercase tracking-widest ${isComparing ? 'text-primary' : 'text-zinc-400'} hover:text-primary flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">${isComparing ? 'check_circle' : 'compare'}</span> ${isComparing ? 'Comparing' : 'Compare'}
              </button>
           </div>
-          <button onclick="openModal('${org.name}')" class="text-primary font-bold text-xs uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">View <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+          <button onclick="openModal('${escapedName}')" class="text-primary font-bold text-xs uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">View <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
         </div>
       `;
       grid.appendChild(card);
@@ -1073,23 +1142,35 @@
 
   function renderCompare() {
     const container = document.querySelector('#compare .grid');
+    const modalContent = document.getElementById('compareModalContent');
+    const badge = document.getElementById('compareBadge');
+    
+    // Update Badge
+    if (badge) {
+      badge.textContent = compareList.length;
+      if (compareList.length > 0) badge.classList.add('show');
+      else badge.classList.remove('show');
+    }
+
     if (!container) return;
     container.innerHTML = '';
     
     compareList.forEach(name => {
       const org = ORGS.find(o => o.name === name);
+      if (!org) return;
       const githubOwner = org.github.split('/')[0];
       const logoUrl = `https://github.com/${githubOwner}.png?size=80`;
+      const escapedName = org.name.replace(/'/g, "\\'");
       
       const item = document.createElement('div');
-      item.className = 'bg-white rounded-xl p-4 border border-zinc-100';
+      item.className = 'bg-white rounded-xl p-4 border border-zinc-100 animate-fade-up';
       item.innerHTML = `
         <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center mx-auto mb-3 overflow-hidden">
-          <img src="${logoUrl}" onerror="handleImgError(this, '${org.name}')" class="w-full h-full object-contain" />
+          <img src="${logoUrl}" onerror="handleImgError(this, '${escapedName}')" class="w-full h-full object-contain" />
         </div>
         <p class="font-bold text-sm truncate">${org.name}</p>
         <p class="text-[10px] text-zinc-500 font-label uppercase mt-1">${org.years}y · ${org.competition}</p>
-        <button onclick="toggleCompare(null, '${org.name}')" class="text-[9px] text-red-500 font-bold uppercase mt-2 hover:underline">Remove</button>
+        <button onclick="toggleCompare(null, '${escapedName}')" class="text-[9px] text-red-500 font-bold uppercase mt-2 hover:underline">Remove</button>
       `;
       container.appendChild(item);
     });
@@ -1105,7 +1186,78 @@
       `;
       container.appendChild(empty);
     }
+
+    // Render Modal Table
+    if (modalContent) {
+      if (compareList.length === 0) {
+        modalContent.innerHTML = `
+          <div class="py-20 text-center">
+            <div class="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="material-symbols-outlined text-zinc-400 text-3xl">compare</span>
+            </div>
+            <h3 class="text-zinc-900 font-bold">No organizations selected</h3>
+            <p class="text-zinc-500 text-sm mt-1">Click the "Compare" button on any organization card to add it here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const selectedOrgs = compareList.map(name => ORGS.find(o => o.name === name)).filter(Boolean);
+      
+      const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
+      let tableHtml = `<table class="compare-table"><thead><tr><th class="compare-row-label">Metric</th>`;
+      selectedOrgs.forEach(o => {
+        tableHtml += `<th>${esc(o.name)}</th>`;
+      });
+      tableHtml += `</tr></thead><tbody>`;
+
+      const metrics = [
+        { label: 'Category', key: 'cat' },
+        { label: 'GSoC Years', key: 'years', suffix: 'y' },
+        { label: 'First Year', key: 'firstYear' },
+        { label: 'Competition', key: 'competition' },
+        { label: 'Codebase', key: 'codebase' },
+        { label: 'Stars ⭐', key: '_gh', subkey: 'stars', fmt: (v) => v >= 1000 ? (v/1000).toFixed(1) + 'k' : v },
+        { label: 'Forks', key: '_gh', subkey: 'forks' },
+        { label: 'Issues', key: '_gh', subkey: 'issues' },
+        { label: 'Activity', key: '_gh', subkey: 'activity' },
+        { label: 'Technologies', key: 'tags', type: 'tags' }
+      ];
+
+      metrics.forEach(m => {
+        tableHtml += `<tr><td class="compare-row-label font-bold text-zinc-500 text-[10px] uppercase tracking-wider">${m.label}</td>`;
+        selectedOrgs.forEach(o => {
+          let val = o[m.key];
+          if (m.key === '_gh') {
+             val = val ? val[m.subkey] : '---';
+             if (m.fmt && val !== '---') val = m.fmt(val);
+          }
+          if (m.type === 'tags') {
+            val = `<div class="flex flex-wrap gap-1">${o.tags.slice(0, 3).map(t => `<span class="px-1.5 py-0.5 bg-zinc-100 text-[9px] rounded font-mono">${t}</span>`).join('')}</div>`;
+          } else {
+            val = `<span class="compare-val">${esc(String(val))}${m.suffix || ''}</span>`;
+          }
+          tableHtml += `<td>${val}</td>`;
+        });
+        tableHtml += `</tr>`;
+      });
+
+      tableHtml += `</tbody></table>`;
+      modalContent.innerHTML = tableHtml;
+    }
   }
+
+  window.openCompareModal = function() {
+    document.getElementById('compareModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderCompare();
+  };
+
+  window.closeCompareModal = function() {
+    document.getElementById('compareModal').classList.remove('open');
+    document.body.style.overflow = 'auto';
+  };
 
   function toggleBookmark(e, name) {
     if (e) e.stopPropagation();
@@ -1134,6 +1286,7 @@
     }
 
     bookmarks.forEach(org => {
+      const escapedName = org.name.replace(/'/g, "\\'");
       const item = document.createElement('div');
       item.className = 'bg-white rounded-2xl p-6 border border-zinc-100 flex flex-col sm:flex-row gap-4 items-start hover:shadow-lg transition-all animate-fade-up';
       item.innerHTML = `
@@ -1149,7 +1302,7 @@
           <div class="flex items-center gap-4 text-xs text-zinc-500">
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">code</span> ${org.github}</span>
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">bar_chart</span> ${org.competition}</span>
-            <button onclick="toggleBookmark(event, '${org.name}')" class="ml-auto text-red-500 font-bold hover:underline">Remove</button>
+            <button onclick="toggleBookmark(event, '${escapedName}')" class="ml-auto text-red-500 font-bold hover:underline">Remove</button>
           </div>
         </div>
       `;
@@ -1232,6 +1385,14 @@ if(org.ideas){
     document.getElementById('orgModal').classList.remove('open');
     document.body.style.overflow = 'auto';
   }
+
+  // Close modals on backdrop click
+  window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-bg') || e.target.classList.contains('compare-bg')) {
+      closeModal();
+      closeCompareModal();
+    }
+  });
 
   // Filters
   function applyFilters() {
@@ -1409,6 +1570,15 @@ if(org.ideas){
       document.getElementById('mIssues').textContent = issues;
       document.getElementById('mActivity').textContent = 'High';
       document.getElementById('mActivity').className = 'gh-stat-item text-green-400';
+      
+      // Save to org object for comparison tool
+      org._gh = {
+        stars: stars,
+        forks: forks,
+        issues: issues,
+        activity: 'High'
+      };
+      renderCompare(); // Refresh comparison if open
       
       btn.textContent = 'Stats Updated!';
     } catch (e) {
